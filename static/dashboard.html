@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Time &amp; Co. -- AI Activity Log</title>
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap");
+
+/* Full design-system token set, copied from the approved Claude Design
+   project's own tokens (colors, typography, radius) -- not a partial
+   guess. Copernicus/StyreneB are licensed Anthropic typefaces with no
+   binaries shipped; using the design system's own documented open-source
+   substitutes (Cormorant Garamond, Inter) exactly as its fonts.css does. */
+:root {
+  --coral: #cc785c;
+  --coral-active: #a9583e;
+  --accent-teal: #5db8a6;
+  --accent-amber: #e8a55a;
+
+  --ink: #141413;
+  --ink-2: #252523;
+  --ink-3: #3d3d3a;
+  --ink-4: #6c6a64;
+  --ink-5: #8e8b82;
+
+  --cream-1: #faf9f5;
+  --cream-2: #f5f0e8;
+  --cream-3: #efe9de;
+  --cream-4: #e8e0d2;
+
+  --line: #e6dfd8;
+  --line-soft: #ebe6df;
+
+  --success: #5db872;
+  --warning: #d4a017;
+  --error: #c64545;
+
+  --primary: var(--coral);
+  --primary-active: var(--coral-active);
+
+  --text-heading: var(--ink);
+  --text-lead: var(--ink-2);
+  --text-body: var(--ink-3);
+  --text-muted: var(--ink-4);
+  --text-caption: var(--ink-5);
+
+  --surface-canvas: var(--cream-1);
+  --surface-soft: var(--cream-2);
+  --surface-card: var(--cream-3);
+  --surface-cream-strong: var(--cream-4);
+
+  --border-hairline: var(--line);
+  --border-hairline-soft: var(--line-soft);
+
+  --font-display: "Cormorant Garamond", Garamond, "Times New Roman", serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --display-md-size: 36px;
+  --display-sm-size: 28px;
+  --title-sm-size: 16px;
+  --body-md-size: 16px;
+  --body-sm-size: 14px;
+
+  --nav-height: 64px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 9999px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--surface-canvas);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--coral); text-decoration: none; }
+a:hover { color: var(--coral-active); }
+
+.container { max-width: 1000px; width: 100%; margin: 0 auto; }
+
+/* Header */
+.site-header {
+  height: var(--nav-height);
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+  border-bottom: 1px solid var(--border-hairline);
+}
+.site-header .container { display: flex; align-items: center; gap: 24px; }
+.wordmark {
+  font-family: var(--font-display);
+  font-size: 20px;
+  letter-spacing: -0.3px;
+  color: var(--text-heading);
+}
+.site-nav { display: flex; align-items: center; gap: 24px; flex: 1; }
+.site-nav a { font-size: 14px; font-weight: 500; color: var(--text-muted); }
+.site-nav a.current { color: var(--text-heading); }
+.header-loc { font-size: 13px; font-weight: 500; color: var(--text-muted); }
+
+main { padding: 48px 32px 96px; }
+main .container { max-width: 1000px; }
+
+/* Page heading + live pill */
+.page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+.page-head-copy { max-width: 620px; display: flex; flex-direction: column; gap: 12px; }
+.page-head h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--display-md-size);
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+  color: var(--text-heading);
+}
+.page-head-copy p {
+  margin: 0;
+  font-size: var(--body-md-size);
+  line-height: 1.55;
+  color: var(--text-body);
+}
+.live-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--surface-card);
+  border-radius: var(--radius-pill);
+  flex: none;
+}
+.live-pill .dot { width: 7px; height: 7px; border-radius: 999px; background: var(--accent-teal); flex: none; }
+.live-pill span.label { font-size: 13px; font-weight: 500; color: var(--text-body); }
+
+/* Stats bar */
+.stats {
+  display: flex;
+  gap: 1px;
+  margin-top: 32px;
+  background: var(--border-hairline);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.stat-cell {
+  flex: 1;
+  background: var(--surface-canvas);
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.stat-label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.stat-value {
+  font-family: var(--font-display);
+  font-size: var(--display-sm-size);
+  line-height: 1.2;
+  letter-spacing: -0.3px;
+  color: var(--text-heading);
+}
+
+/* Legend */
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin: 24px 0 8px;
+  padding: 12px 16px;
+  border: 1px solid var(--border-hairline-soft);
+  border-radius: var(--radius-md);
+}
+.legend-title {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-body); }
+.legend-item .dot { width: 8px; height: 8px; border-radius: 999px; flex: none; }
+
+/* Empty state */
+.empty-state {
+  margin-top: 40px;
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+  padding: 64px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+.empty-state .dot { width: 9px; height: 9px; border-radius: 999px; background: var(--accent-teal); }
+.empty-state h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--display-sm-size);
+  letter-spacing: -0.3px;
+  color: var(--text-heading);
+}
+.empty-state p {
+  margin: 0;
+  max-width: 420px;
+  font-size: var(--body-sm-size);
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+/* Timeline */
+.timeline {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  position: relative;
+}
+.timeline-rail {
+  position: absolute;
+  left: 5px;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: var(--border-hairline);
+}
+.timeline-item { position: relative; padding-left: 34px; padding-bottom: 14px; }
+.timeline-dot {
+  position: absolute;
+  left: 0;
+  top: 22px;
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
+  border: 2px solid var(--surface-canvas);
+  box-sizing: border-box;
+}
+
+.entry-card {
+  background: var(--surface-card);
+  border-radius: var(--radius-lg);
+  padding: 18px 22px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.entry-top { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.entry-action { font-size: var(--title-sm-size); font-weight: 500; color: var(--text-heading); }
+.entry-time { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); }
+.entry-spacer { flex: 1; }
+.entry-badge {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.4px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+.entry-reason {
+  margin: 8px 0 0;
+  font-size: var(--body-sm-size);
+  line-height: 1.55;
+  color: var(--text-body);
+}
+
+.entry-detail {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--surface-cream-strong);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.entry-detail-cols { display: flex; gap: 32px; flex-wrap: wrap; }
+.entry-detail-field { display: flex; flex-direction: column; gap: 4px; }
+.entry-detail-label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.entry-detail-value { font-size: var(--body-sm-size); color: var(--text-heading); }
+.entry-metadata {
+  margin: 0;
+  padding: 10px 12px;
+  background: var(--surface-canvas);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-body);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.entry-hint { margin-top: 10px; font-size: 12px; font-weight: 500; color: var(--text-muted); }
+
+[hidden] { display: none !important; }
+
+@media (max-width: 640px) {
+  .site-header { padding: 0 20px; }
+  .site-header .container { flex-wrap: wrap; height: auto; padding: 12px 0; gap: 8px 20px; }
+  .site-header { height: auto; }
+  main { padding: 32px 20px 64px; }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; }
+  .stat-cell { min-width: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <span class="wordmark">Time &amp; Co.</span>
+    <nav class="site-nav">
+      <a href="../storefront/index.html">Storefront</a>
+      <a href="#" class="current">AI activity</a>
+    </nav>
+    <span class="header-loc">T. Nagar, Chennai</span>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+
+    <div class="page-head">
+      <div class="page-head-copy">
+        <h1>Time &amp; Co. — AI Activity Log</h1>
+        <p>Every AI buyer interaction with Time &amp; Co., explained in plain English.</p>
+      </div>
+      <div class="live-pill">
+        <span class="dot"></span>
+        <span class="label">Live — refreshing every 2s</span>
+      </div>
+    </div>
+
+    <div id="stats" class="stats" hidden>
+      <div class="stat-cell">
+        <span class="stat-label">Events today</span>
+        <span class="stat-value" id="stat-total">0</span>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-label">Approved</span>
+        <span class="stat-value" id="stat-approved">0</span>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-label">Blocked</span>
+        <span class="stat-value" id="stat-blocked">0</span>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-label">Buyer agents</span>
+        <span class="stat-value" id="stat-agents">0</span>
+      </div>
+    </div>
+
+    <div id="legend" class="legend" hidden>
+      <span class="legend-title">Legend</span>
+      <span class="legend-item"><span class="dot" style="background:var(--success)"></span>Approved or informational</span>
+      <span class="legend-item"><span class="dot" style="background:var(--warning)"></span>Inferred — lower confidence</span>
+      <span class="legend-item"><span class="dot" style="background:var(--error)"></span>Blocked by a mandate rule</span>
+    </div>
+
+    <ul id="timeline" class="timeline" hidden>
+      <li class="timeline-rail"></li>
+    </ul>
+
+    <div id="empty-state" class="empty-state" hidden>
+      <span class="dot"></span>
+      <h2>No activity yet — waiting for a buyer agent</h2>
+      <p>Time &amp; Co.'s catalog is published and listening. The first query, negotiation or payment will appear here within seconds of it happening.</p>
+    </div>
+
+  </div>
+</main>
+
+<script>
+const ACTION_LABELS = {
+  enrichment: "Item enriched",
+  negotiate_offer: "Discount negotiated",
+  mandate_check: "Mandate checked",
+  payment: "Payment processed",
+};
+
+const ENTITY_LABELS = {
+  catalog_item: "Catalog item",
+  mandate: "Mandate",
+};
+
+// (badgeBg, badgeFg) per reasoning_basis, and its display text -- matches
+// the approved design exactly. "blocked-mandate-violation" is the real
+// hyphenated value models.py stores; displayed with the design's spacing.
+const BASIS_STYLE = {
+  "inferred":                   { bg: "#f7ecd2", fg: "#8a6410", text: "inferred" },
+  "rule-matched":                { bg: "#dbeee8", fg: "#2f6d5f", text: "rule-matched" },
+  "explicit":                   { bg: "#e6dfd8", fg: "#3d3d3a", text: "explicit" },
+  "blocked-mandate-violation":  { bg: "#f6dede", fg: "#9c2f2f", text: "blocked — mandate violation" },
+};
+
+const expanded = new Set(); // entry ids currently expanded -- persists across refreshes
+
+function actionLabel(action) {
+  return ACTION_LABELS[action] || action;
+}
+
+function formatTime(iso) {
+  try {
+    return new Date(iso)
+      .toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit", hour12: true })
+      .replace("AM", "am")
+      .replace("PM", "pm");
+  } catch {
+    return iso;
+  }
+}
+
+function linkedEntityText(entry) {
+  if (!entry.linked_entity_type || entry.linked_entity_id == null) return "—";
+  const label = ENTITY_LABELS[entry.linked_entity_type] || entry.linked_entity_type;
+  return `${label} #${entry.linked_entity_id}`;
+}
+
+// Dot color: an inferred (lower-confidence) entry is always flagged amber,
+// regardless of decision; otherwise color follows decision. Matches the
+// approved design's own dot-color logic exactly.
+function dotColor(entry) {
+  if (entry.reasoning_basis === "inferred") return "var(--warning)";
+  if (entry.decision === "blocked") return "var(--error)";
+  return "var(--success)";
+}
+
+function buildEntry(entry) {
+  const li = document.createElement("li");
+  li.className = "timeline-item";
+
+  const dot = document.createElement("span");
+  dot.className = "timeline-dot";
+  dot.style.background = dotColor(entry);
+  li.appendChild(dot);
+
+  const card = document.createElement("div");
+  card.className = "entry-card";
+
+  const top = document.createElement("div");
+  top.className = "entry-top";
+
+  const actionEl = document.createElement("span");
+  actionEl.className = "entry-action";
+  actionEl.textContent = actionLabel(entry.action);
+  top.appendChild(actionEl);
+
+  const timeEl = document.createElement("span");
+  timeEl.className = "entry-time";
+  timeEl.textContent = formatTime(entry.timestamp);
+  top.appendChild(timeEl);
+
+  top.appendChild(Object.assign(document.createElement("span"), { className: "entry-spacer" }));
+
+  const basisStyle = BASIS_STYLE[entry.reasoning_basis];
+  if (basisStyle) {
+    const badge = document.createElement("span");
+    badge.className = "entry-badge";
+    badge.style.background = basisStyle.bg;
+    badge.style.color = basisStyle.fg;
+    badge.textContent = basisStyle.text;
+    top.appendChild(badge);
+  }
+
+  card.appendChild(top);
+
+  const reasonEl = document.createElement("p");
+  reasonEl.className = "entry-reason";
+  reasonEl.textContent = entry.reason;
+  card.appendChild(reasonEl);
+
+  const isOpen = expanded.has(entry.id);
+
+  const detail = document.createElement("div");
+  detail.className = "entry-detail";
+  detail.hidden = !isOpen;
+
+  const cols = document.createElement("div");
+  cols.className = "entry-detail-cols";
+
+  const fields = [
+    ["Linked to", linkedEntityText(entry)],
+    ["Actor", entry.actor],
+    ["Decision", entry.decision],
+  ];
+  for (const [label, value] of fields) {
+    const field = document.createElement("div");
+    field.className = "entry-detail-field";
+    field.innerHTML = `<span class="entry-detail-label">${label}</span><span class="entry-detail-value"></span>`;
+    field.querySelector(".entry-detail-value").textContent = value;
+    cols.appendChild(field);
+  }
+  detail.appendChild(cols);
+
+  if (entry.metadata && Object.keys(entry.metadata).length > 0) {
+    const metaField = document.createElement("div");
+    metaField.className = "entry-detail-field";
+    const metaLabel = document.createElement("span");
+    metaLabel.className = "entry-detail-label";
+    metaLabel.textContent = "Details";
+    const pre = document.createElement("pre");
+    pre.className = "entry-metadata";
+    pre.textContent = JSON.stringify(entry.metadata, null, 2);
+    metaField.appendChild(metaLabel);
+    metaField.appendChild(pre);
+    detail.appendChild(metaField);
+  }
+
+  card.appendChild(detail);
+
+  const hint = document.createElement("div");
+  hint.className = "entry-hint";
+  hint.textContent = isOpen ? "Click to collapse" : "Click for full reasoning";
+  card.appendChild(hint);
+
+  card.addEventListener("click", () => {
+    const nowOpen = detail.hidden; // about to open
+    detail.hidden = !nowOpen;
+    hint.textContent = nowOpen ? "Click to collapse" : "Click for full reasoning";
+    if (nowOpen) expanded.add(entry.id);
+    else expanded.delete(entry.id);
+  });
+
+  li.appendChild(card);
+  return li;
+}
+
+async function loadLog() {
+  let entries;
+  try {
+    const res = await fetch("/audit-log");
+    entries = await res.json();
+  } catch (e) {
+    return; // backend not reachable this tick; try again next interval
+  }
+
+  const statsEl = document.getElementById("stats");
+  const legendEl = document.getElementById("legend");
+  const timelineEl = document.getElementById("timeline");
+  const emptyStateEl = document.getElementById("empty-state");
+
+  if (!entries.length) {
+    statsEl.hidden = true;
+    legendEl.hidden = true;
+    timelineEl.hidden = true;
+    emptyStateEl.hidden = false;
+    return;
+  }
+
+  statsEl.hidden = false;
+  legendEl.hidden = false;
+  timelineEl.hidden = false;
+  emptyStateEl.hidden = true;
+
+  const approved = entries.filter((e) => e.decision === "approved").length;
+  const blocked = entries.filter((e) => e.decision === "blocked").length;
+  const agents = new Set(
+    entries.map((e) => e.metadata && e.metadata.agent_id).filter(Boolean)
+  );
+
+  document.getElementById("stat-total").textContent = entries.length;
+  document.getElementById("stat-approved").textContent = approved;
+  document.getElementById("stat-blocked").textContent = blocked;
+  document.getElementById("stat-agents").textContent = agents.size;
+
+  // Newest first, matching the approved design.
+  const ordered = [...entries].reverse();
+  const rail = document.createElement("li");
+  rail.className = "timeline-rail";
+  timelineEl.replaceChildren(rail, ...ordered.map(buildEntry));
+}
+
+loadLog();
+setInterval(loadLog, 2000);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,7 @@
+fastapi==0.141.1
+starlette==1.6.0
+uvicorn[standard]==0.52.4
+sqlalchemy==2.0.52
+requests==2.34.2
+razorpay==2.0.1
+python-dotenv==1.2.3
