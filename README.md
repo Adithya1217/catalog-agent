@@ -1,5 +1,12 @@
 # Time & Co. — Agentic Commerce Reference Implementation
 
+![Python 3.14](https://img.shields.io/badge/python-3.14-blue)
+![FastAPI](https://img.shields.io/badge/backend-FastAPI-009688)
+![Razorpay](https://img.shields.io/badge/payments-Razorpay%20Test%20Mode-0C2451)
+![Gemini](https://img.shields.io/badge/LLM-Gemini%20Flash-8E75B2)
+![SQLite](https://img.shields.io/badge/storage-SQLite-lightgrey)
+![Hackathon](https://img.shields.io/badge/Razorpay%20Hackathon-Track%201-orange)
+
 An AI-readiness layer for merchants, built for Razorpay Hackathon Track 1. Time & Co. is a reference merchant — a real stationery shop's messy raw catalog, enriched by an LLM into structured data an AI buyer agent can browse, negotiate against, and pay through. The point isn't the buyer agent; it's the merchant-side contract that makes any merchant AI-transactable: a browsable catalog, a negotiation surface with real guardrails, a spend mandate the merchant enforces (not the agent), and a full audit trail of every AI-driven decision.
 
 ## How it works
@@ -22,6 +29,77 @@ Two guardrails matter here and are deliberately kept distinct, because they are 
 | Blocks | A discount request that's too generous | A purchase that's simply too large or out of scope, discount or not |
 
 A run can be blocked by either one, or neither, depending on what the agent decides to ask for — that's a live model decision, not a script.
+
+## Architecture
+
+```mermaid
+flowchart TD
+    Agent["Buyer Agent\n(demo_agent.py)\nlive Gemini tool-use loop"]
+    API["Merchant API\n(main.py, FastAPI)"]
+    DB[("SQLite\ndata/store.db")]
+    Guard["Negotiation Guardrail\n(negotiate.py)\nhardcoded discount rules"]
+    Mandate["Mandate Check\n(payment.py)\nspend cap + category scope"]
+    RZP["Razorpay Test Mode\norder + human Checkout"]
+    Audit["Audit Log\n(audit.py -> audit_log table)"]
+    Dash["Merchant Dashboard\n(static/dashboard.html)"]
+
+    Agent -->|"GET /catalog"| API
+    API --> DB
+    Agent -->|"POST /negotiate"| API --> Guard
+    Guard -->|"approved / blocked"| Agent
+    Agent -->|"POST /payment"| API --> Mandate
+    Mandate -->|"blocked -- no order created"| Agent
+    Mandate -->|"passed"| RZP
+    RZP -->|"human completes Checkout live"| Captured["Captured Payment"]
+    Captured --> Agent
+
+    Guard --> Audit
+    Mandate --> Audit
+    API --> Audit
+    Audit --> Dash
+```
+
+Every box on the right side of that diagram is a real, running check — nothing here is a mock decision layer. The two guardrails sit at different points in the request lifecycle on purpose, since they're answering different questions:
+
+```mermaid
+sequenceDiagram
+    participant Agent as Buyer Agent
+    participant API as Merchant API
+    participant Guard as Negotiation Guardrail
+    participant Mandate as Mandate Check
+    participant RZP as Razorpay (test mode)
+    participant Log as Audit Log
+
+    Agent->>API: POST /negotiate (item, qty, discount %)
+    API->>Guard: evaluate_offer()
+    alt discount too large, or order too small to qualify
+        Guard-->>API: blocked
+        API->>Log: negotiate_offer / blocked
+        API-->>Agent: blocked + reason
+    else within limits
+        Guard-->>API: approved
+        API->>Log: negotiate_offer / approved
+        API-->>Agent: approved + final price
+    end
+
+    Agent->>API: POST /payment (item, qty, agreed price)
+    API->>Mandate: verify_mandate_cap() + check_mandate_scope()
+    alt exceeds spend cap, or category out of scope
+        Mandate-->>API: blocked
+        API->>Log: mandate_check / blocked
+        API-->>Agent: 403 -- no Razorpay order ever created
+    else within mandate
+        Mandate-->>API: passed
+        API->>RZP: create_order()
+        RZP-->>API: order
+        Note over API,RZP: human completes Checkout out-of-band
+        RZP-->>API: payment captured
+        API->>Log: payment / approved
+        API-->>Agent: order + payment receipt
+    end
+```
+
+A request that never negotiates and stays within the mandate never touches either guardrail's blocked path. A request can also fail the negotiation guardrail before a mandate check is ever reached, or clear negotiation and still fail the mandate check — which guardrail (if either) fires depends on what the agent actually asks for, not a scripted sequence.
 
 ## Project structure
 
@@ -123,3 +201,13 @@ Because the agent decides everything itself from a single instruction (it has no
 - The LLM model used for enrichment, negotiation explanations, and the buyer agent's tool-use loop is Gemini Flash, selected empirically by measured availability rather than a fixed choice — see `llm.py` for the current model and fallback order. Calls retry with backoff on transient 429/5xx responses before falling back to an alternate model.
 - Payment completion cannot be automated end-to-end: Razorpay's Checkout requires a human to click through a real bank-page simulation, even in test mode, by design.
 - The seeded mandate (`id=1`) is a single one-time spend cap, not a running balance — there is no notion of cumulative spend across multiple purchases in this build.
+
+## Known limitations
+
+Scoped deliberately for a hackathon build, not overlooked:
+
+- No authentication on the API. `main.py`'s endpoints are open — anyone who can reach the server can call them. Fine for a local demo against test-mode payments; not how this would ship.
+- No automated end-to-end test suite. `test_negotiate_logic.py` is a hand-written sanity check for `evaluate_offer()`'s branching logic only, run against made-up prices, not the real seeded catalog — it proves the guardrail's own rule logic is internally consistent, nothing more.
+- No CI. Every verification in this repo's history was a manual diff review plus a live run, not an automated pipeline.
+- Single merchant, single mandate, single buyer agent. There's no multi-tenant story here — one seeded `Mandate` row, one hardcoded `agent_id`.
+- The buyer agent can't ask a clarifying question mid-run. It gets one plain-language request and has to decide everything itself in that single pass — including inferring a quantity if the request didn't state one.
