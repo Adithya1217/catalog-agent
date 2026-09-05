@@ -27,10 +27,12 @@ import http.server
 import os
 import threading
 import time
+import webbrowser
 
 import requests
 from dotenv import load_dotenv
 
+import console_ui as ui
 from payment import get_client
 
 load_dotenv()
@@ -179,17 +181,40 @@ def pay_with_checkout(
         time.sleep(1)
 
     if order:
+        # The order's existence is itself proof the mandate check already
+        # passed -- payment.py only calls create_order() after that check
+        # (see this module's docstring). Announce both stages now, in the
+        # order they actually happened, instead of waiting for the whole
+        # blocking call (which still has to wait on the human checkout
+        # step) to resolve before the console says anything about them.
+        ui.mandate_passed()
+        ui.razorpay_order_created(order.get("id", "-"), order.get("amount"))
+
         description = f"Time & Co. -- item #{payload['item_id']} x{payload['quantity']}"
         url = _serve_checkout(order, description)
-        print(f"\n{'*' * 60}")
-        print(f"  CHECKOUT READY -- complete the real payment here:")
-        print(f"  {url}")
-        print(f"{'*' * 60}\n")
+        ui.checkout_ready(url)
+        try:
+            # Best-effort convenience: the URL above is already the
+            # source of truth and is printed regardless of whether this
+            # succeeds (e.g. no GUI browser available on this machine).
+            webbrowser.open(url)
+        except Exception:
+            pass
     elif not done.is_set():
-        print("  (no matching Razorpay order appeared within the lookup window)")
+        ui.checkout_note("(no matching Razorpay order appeared within the lookup window)")
     else:
-        print("  (payment call finished before any Razorpay order was created -- "
-              "likely blocked by a mandate check before Razorpay was ever contacted)")
+        ui.checkout_note(
+            "(payment call finished before any Razorpay order was created -- "
+            "likely blocked by a mandate check before Razorpay was ever contacted)"
+        )
 
     thread.join()
-    return {"status_code": result_box.get("status_code"), "body": result_box.get("body")}
+    return {
+        "status_code": result_box.get("status_code"),
+        "body": result_box.get("body"),
+        # Lets the caller avoid re-announcing mandate-passed/order-created
+        # when this function already did so above (the common case). Only
+        # false in the rare case the order-lookup window expired before a
+        # matching order was found, or no order was ever created at all.
+        "order_announced": order is not None,
+    }
