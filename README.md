@@ -101,6 +101,52 @@ sequenceDiagram
 
 A request that never negotiates and stays within the mandate never touches either guardrail's blocked path. A request can also fail the negotiation guardrail before a mandate check is ever reached, or clear negotiation and still fail the mandate check — which guardrail (if either) fires depends on what the agent actually asks for, not a scripted sequence.
 
+## Data model
+
+Three tables, defined in `models.py`. The schema declares no foreign-key constraints: the dotted links below are logical references that the application resolves, not database-enforced relationships. `Mandate.agent_id` is a plain string naming the buyer agent, and `AuditLog.linked_entity_type` / `linked_entity_id` form a polymorphic pointer to either a `catalog_item` or a `mandate`.
+
+```mermaid
+erDiagram
+    CATALOG_ITEMS {
+        int id PK
+        string raw_name
+        text raw_description
+        text clean_description
+        string category
+        json tags
+        string price_raw
+        float price
+        int stock
+        string terms
+        text enrichment_reasoning
+        string enrichment_confidence
+        datetime created_at
+    }
+    MANDATES {
+        int id PK
+        string agent_id
+        float spend_cap
+        json category_scope
+        string mandate_type
+        string status
+        datetime created_at
+    }
+    AUDIT_LOG {
+        int id PK
+        datetime timestamp
+        string actor
+        string action
+        string decision
+        text reason
+        string reasoning_basis
+        string linked_entity_type
+        int linked_entity_id
+        json log_metadata
+    }
+    CATALOG_ITEMS ||..o{ AUDIT_LOG : "linked_entity (catalog_item)"
+    MANDATES ||..o{ AUDIT_LOG : "linked_entity (mandate)"
+```
+
 ## Project structure
 
 ```
