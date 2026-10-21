@@ -1,0 +1,12 @@
+.venv/
+.env
+data/store.db
+data/store.db-journal
+__pycache__/
+*.pyc
+*.log
+.DS_Store
+
+*.mp4
+.fc_*.jpg
+.pytest_cache/

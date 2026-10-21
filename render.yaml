@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: time-and-co
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: DB_PATH
+        value: /app/data/store.db
+      - key: API_KEY
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false

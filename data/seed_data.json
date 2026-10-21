@@ -1,0 +1,283 @@
+{
+  "catalog_items": [
+    {
+      "raw_name": "Blue Ball Pen (Pack of 10)",
+      "raw_description": "Smooth writing, medium tip",
+      "clean_description": "A pack of 10 smooth-writing blue ball pens featuring a medium tip.",
+      "category": "stationery/writing",
+      "tags": [
+        "blue",
+        "ballpoint",
+        "pen",
+        "pack"
+      ],
+      "price_raw": "₹45",
+      "price": 45.0,
+      "stock": 120,
+      "terms": "min order 1 pack",
+      "enrichment_reasoning": "The price was directly extracted as 45.0 rupees from the raw listing after stripping the currency symbol.",
+      "enrichment_confidence": "explicit"
+    },
+    {
+      "raw_name": "A4 Notebook 200pg Ruled",
+      "raw_description": null,
+      "clean_description": "A standard A4-sized notebook containing 200 ruled pages for writing and note-taking.",
+      "category": "stationery/notebooks",
+      "tags": [
+        "a4",
+        "ruled",
+        "paper",
+        "notebook"
+      ],
+      "price_raw": "Rs. 85/-",
+      "price": 85.0,
+      "stock": 60,
+      "terms": null,
+      "enrichment_reasoning": "Extracted the numeric price directly from the currency string by stripping the currency symbol and suffix.",
+      "enrichment_confidence": "rule-matched"
+    },
+    {
+      "raw_name": "sticky notes asstd colors",
+      "raw_description": "3x3 inch, 100 sheets/pad",
+      "clean_description": "Assorted color 3x3 inch sticky notes featuring 100 sheets per pad, sold in a pack of four pads.",
+      "category": "stationery/organization",
+      "tags": [
+        "sticky notes",
+        "assorted colors",
+        "3x3 inch",
+        "pack of 4"
+      ],
+      "price_raw": "30",
+      "price": 120.0,
+      "stock": 200,
+      "terms": "pack of 4 pads",
+      "enrichment_reasoning": "Multiplied the single pad price of 30 by 4 to reflect the total price for the sellable four-pack unit stated in the terms.",
+      "enrichment_confidence": "rule-matched"
+    },
+    {
+      "raw_name": "STAPLER SMALL NO.10",
+      "raw_description": "Includes 1 box pins",
+      "clean_description": "Small size No. 10 office stapler that includes one box of staples.",
+      "category": "stationery/organization",
+      "tags": [
+        "stapler",
+        "no.10",
+        "office supplies",
+        "with pins"
+      ],
+      "price_raw": "₹60",
+      "price": 60.0,
+      "stock": 45,
+      "terms": null,
+      "enrichment_reasoning": "Extracted the fixed price of 60 rupees from the currency symbol and applied the rule to strip formatting.",
+      "enrichment_confidence": "rule-matched"
+    },
+    {
+      "raw_name": "Whiteboard Markers (set of 4)",
+      "raw_description": "black blue red green, low odour",
+      "clean_description": "A set of four assorted whiteboard markers in black, blue, red, and green with low odour ink.",
+      "category": "stationery/writing",
+      "tags": [
+        "whiteboard marker",
+        "assorted",
+        "low odour",
+        "set of 4"
+      ],
+      "price_raw": "Rs.120/-",
+      "price": 120.0,
+      "stock": 35,
+      "terms": null,
+      "enrichment_reasoning": "Extracted the firm price by stripping the currency symbol and formatting from Rs.120/- using rule-matched pricing.",
+      "enrichment_confidence": "rule-matched"
+    },
+    {
+      "raw_name": "gel pen 0.5mm blk",
+      "raw_description": null,
+      "clean_description": "A black 0.5mm gel pen designed for smooth writing.",
+      "category": "stationery/writing",
+      "tags": [
+        "black",
+        "0.5mm",
+        "gel pen",
+        "writing"
+      ],
+      "price_raw": "15",
+      "price": 15.0,
+      "stock": 300,
+      "terms": "sold per piece",
+      "enrichment_reasoning": "Cleaned the raw price of 15 into a standard float and expanded the abbreviation blk to black using the per-piece selling term.",
+      "enrichment_confidence": "rule-matched"
+    },
+    {
+      "raw_name": "File Folder A4",
+      "raw_description": "plastic, transparent",
+      "clean_description": "Transparent plastic A4 file folder designed for document storage and organization.",
+      "category": "stationery/organization",
+      "tags": [
+        "plastic",
+        "transparent",
+        "a4",
+        "folder"
+      ],
+      "price_raw": "₹18 each",
+      "price": 18.0,
+      "stock": 150,
+      "terms": "min order 10",
+      "enrichment_reasoning": "Extracted the per-piece price directly from the currency-formatted text and applied a rule-matched cleaning to remove the rupee symbol.",
+      "enrichment_confidence": "rule-matched"
+    },
+    {
+      "raw_name": "Highlighter Neon Set/5",
+      "raw_description": "assorted neon shades",
+      "clean_description": "Set of five assorted neon highlighter pens for highlighting text and organizing notes.",
+      "category": "stationery/writing",
+      "tags": [
+        "highlighter",
+        "neon",
+        "set of 5",
+        "assorted"
+      ],
+      "price_raw": "90",
+      "price": 90.0,
+      "stock": 40,
+      "terms": null,
+      "enrichment_reasoning": "Extracted the direct price of 90 rupees from the raw input and categorized the item as a writing tool set based on the highlighter name.",
+      "enrichment_confidence": "explicit"
+    },
+    {
+      "raw_name": "Wooden Desk Organiser",
+      "raw_description": "4-compartment, teak finish",
+      "clean_description": "A four-compartment wooden desk organizer with a teak finish for office supplies.",
+      "category": "stationery/organization",
+      "tags": [
+        "wooden",
+        "desk",
+        "teak finish",
+        "compartment"
+      ],
+      "price_raw": "MRP 350",
+      "price": 350.0,
+      "stock": 12,
+      "terms": null,
+      "enrichment_reasoning": "Extracted the fixed retail price directly from the MRP prefix in the raw price field.",
+      "enrichment_confidence": "explicit"
+    },
+    {
+      "raw_name": "correction tape 5mm",
+      "raw_description": null,
+      "clean_description": "A 5mm correction tape for neatly covering writing errors on paper.",
+      "category": "stationery/writing",
+      "tags": [
+        "correction tape",
+        "5mm",
+        "office supplies",
+        "correction"
+      ],
+      "price_raw": "Rs. 35",
+      "price": 35.0,
+      "stock": 80,
+      "terms": null,
+      "enrichment_reasoning": "Extracted the price by stripping the currency prefix and format from Rs. 35 using standard rule-matching.",
+      "enrichment_confidence": "rule-matched"
+    },
+    {
+      "raw_name": "Glue Stick 15g (Dozen)",
+      "raw_description": null,
+      "clean_description": "A box of twelve 15-gram adhesive glue sticks designed for school and office bonding use.",
+      "category": "stationery/adhesives",
+      "tags": [
+        "glue stick",
+        "adhesive",
+        "craft",
+        "dozen pack"
+      ],
+      "price_raw": "₹8/pc, sold dozen only",
+      "price": 96.0,
+      "stock": 20,
+      "terms": "min order 1 dozen",
+      "enrichment_reasoning": "Calculated the price for the sellable unit by multiplying the per-piece price of 8 rupees by the 12 pieces in a required dozen.",
+      "enrichment_confidence": "rule-matched"
+    },
+    {
+      "raw_name": "Scissors 8\"",
+      "raw_description": "stainless steel, office use",
+      "clean_description": "An 8-inch stainless steel pair of scissors suitable for general office use.",
+      "category": "stationery/office supplies",
+      "tags": [
+        "stainless steel",
+        "office use",
+        "scissors",
+        "cutting tool"
+      ],
+      "price_raw": "55",
+      "price": 55.0,
+      "stock": 25,
+      "terms": null,
+      "enrichment_reasoning": "Extracted the price directly from the numeric price field without needing currency stripping.",
+      "enrichment_confidence": "explicit"
+    },
+    {
+      "raw_name": "rubber bands (pack)",
+      "raw_description": "assorted sizes, 100g",
+      "clean_description": "A pack of assorted size rubber bands weighing 100 grams, suitable for general office and household organization.",
+      "category": "stationery/organization",
+      "tags": [
+        "rubber bands",
+        "assorted sizes",
+        "100g",
+        "pack"
+      ],
+      "price_raw": "25",
+      "price": 25.0,
+      "stock": 90,
+      "terms": null,
+      "enrichment_reasoning": "Extracted the direct price of 25 rupees for the 100g pack as provided in the raw data without needing conversion.",
+      "enrichment_confidence": "explicit"
+    },
+    {
+      "raw_name": "Kalam Special Combo Pack",
+      "raw_description": "mixed items, ask in store for contents",
+      "clean_description": "Assorted mixed stationery items packaged as a special combination pack.",
+      "category": "stationery/assorted",
+      "tags": [
+        "combo pack",
+        "mixed items",
+        "stationery"
+      ],
+      "price_raw": "₹200",
+      "price": 200.0,
+      "stock": 30,
+      "terms": "contents vary by stock on hand",
+      "enrichment_reasoning": "Contents vary and no fixed contents are listed, so I categorized it broadly as assorted and used the explicit price of 200 rupees.",
+      "enrichment_confidence": "inferred"
+    },
+    {
+      "raw_name": "Pencil Box (assorted)",
+      "raw_description": "Currently unavailable — new stock awaited",
+      "clean_description": "Assorted design pencil box for organizing writing instruments.",
+      "category": "stationery/organization",
+      "tags": [
+        "pencil box",
+        "assorted",
+        "storage"
+      ],
+      "price_raw": "Rs. 40-65 depending on design",
+      "price": 52.5,
+      "stock": 18,
+      "terms": null,
+      "enrichment_reasoning": "The description says stock is awaited while the stock field records 18 units, so I treated the numeric stock as current and used the midpoint of the stated price range (Rs. 40-65) to arrive at the price.",
+      "enrichment_confidence": "inferred"
+    }
+  ],
+  "mandates": [
+    {
+      "agent_id": "demo-buyer-agent-01",
+      "spend_cap": 15000.0,
+      "category_scope": [
+        "stationery"
+      ],
+      "mandate_type": "one_time",
+      "status": "active"
+    }
+  ]
+}
